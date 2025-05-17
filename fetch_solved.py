@@ -1,24 +1,25 @@
-import json
 import requests
 
-USERNAME = "Y_Maekawa"  # あなたのAtCoder ID
+USERNAME = "Y_Maekawa"
 
-# AtCoder Problems API
-url = f"https://kenkoooo.com/atcoder/atcoder-api/results?user=Y_Maekawa"
-res = requests.get("https://kenkoooo.com/atcoder/#/table/Y_maekawa")
-submissions = res.json()
+url = f"https://kenkoooo.com/atcoder/atcoder-api/results?user={USERNAME}"
 
-# ユニークな問題IDでACされたものをカウント
-ac_problems = {s['problem_id'] for s in submissions if s['result'] == 'AC'}
+res = requests.get(url)
 
-# バッジ形式に整形
-badge = {
-    "schemaVersion": 1,
-    "label": "AC problems",
-    "message": f"{len(ac_problems)} solved",
-    "color": "brightgreen"
-}
+# ✅ ステータスコードとレスポンスの確認
+if res.status_code != 200:
+    print(f"Error: Failed to fetch data. Status code: {res.status_code}")
+    exit(1)
 
-# JSONファイルに保存
-with open("solved.json", "w") as f:
-    json.dump(badge, f)
+try:
+    submissions = res.json()
+except Exception as e:
+    print(f"Error parsing JSON: {e}")
+    print("Response content:", res.text[:200])  # 念のため一部表示
+    exit(1)
+
+# ✅ 正常時の処理（例：AC数カウント）
+ac_count = sum(1 for s in submissions if s["result"] == "AC")
+print(f"Solved problems: {ac_count}")
+
+# ↓ ファイル出力などの後続処理をここに
